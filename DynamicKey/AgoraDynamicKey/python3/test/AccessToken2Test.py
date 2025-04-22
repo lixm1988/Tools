@@ -11,6 +11,7 @@ sys.path.insert(0, os.path.abspath(
 from src.AccessToken2 import *
 from src.utils import *
 
+
 class AccessToken2Test(unittest.TestCase):
     def setUp(self) -> None:
         self.__app_id = "970CA35de60c44645bbae8a215061b33"
@@ -80,44 +81,44 @@ class AccessToken2Test(unittest.TestCase):
 
         self.assertEqual(expected, result)
 
-    def test_service_education_room_user(self):
-        char_user_id = get_md5(self.__uid_str)
-        education_service = ServiceEducation(
+    def test_service_apaas_room_user(self):
+        chat_user_id = get_md5(self.__uid_str)
+        apaas_service = ServiceApaas(
             self.__room_uuid, self.__uid_str, self.__role)
-        education_service.add_privilege(
-            ServiceEducation.kPrivilegeRoomUser, self.__expire)
-        self.__token.add_service(education_service)
+        apaas_service.add_privilege(
+            ServiceApaas.kPrivilegeRoomUser, self.__expire)
+        self.__token.add_service(apaas_service)
 
         rtm_service = ServiceRtm(self.__uid_str)
         rtm_service.add_privilege(ServiceRtm.kPrivilegeLogin, self.__expire)
         self.__token.add_service(rtm_service)
 
-        chat_service = ServiceChat(char_user_id)
+        chat_service = ServiceChat(chat_user_id)
         chat_service.add_privilege(ServiceChat.kPrivilegeUser, self.__expire)
         self.__token.add_service(chat_service)
 
         result = self.__token.build()
 
-        expected = '007eJxTYPDt2Lmu+dWxJ0sv/ZP/56n/cMLkSc3XOmpZA6/NtOlbWumjwGBpbuDsaGyakmpmkGxiYmZimpSUmGqRaGRoamBmmGRs7P5FgCGCiYGBkYGBgZmBHUgzgvnMDIZGxlwMRhYWRsYmhkbmxowMTHBJZHFWuKgCg5mBmbGxhbGJkUWisVlaUqJxWpKZgbFBUmpymoWBpUkqAGF8Kv8='
+        expected = '007eJxTYOi6fYVB7qlA2ZWQ+Ko3N2IafQOddj+K4tjh3PS7P2vx4a0KDJbmBs6OxqYpqWYGySYmZiamSUmJqRaJRoamBmaGScbG7l8EGCKYGBgYGRgYmBmYgDQjmM/FYGRhYWRsYmhkbswKF1VgMDMwMza2MDYxskg0NktLSjROSzIzMDZISk1OszCwNEllh6tlZjA0MkY2hpEBANqIKYQ='
 
         self.assertEqual(expected, result)
 
-    def test_service_education_user(self):
-        education_service = ServiceEducation(user_uuid=self.__uid_str)
-        education_service.add_privilege(
-            ServiceEducation.kPrivilegeUser, self.__expire)
-        self.__token.add_service(education_service)
+    def test_service_apaas_user(self):
+        apaas_service = ServiceApaas(user_uuid=self.__uid_str)
+        apaas_service.add_privilege(
+            ServiceApaas.kPrivilegeUser, self.__expire)
+        self.__token.add_service(apaas_service)
 
         result = self.__token.build()
 
         expected = '007eJxTYEg4e9Zj9gch+QkfFi1qM7tdkn1G3Kzt6FTJpTpzRQ4brixTYLA0N3B2NDZNSTUzSDYxMTMxTUpKTLVINDI0NTAzTDI2dv8iwBDBxMDAyADC7EDMBOYzMHAxGFlYGBmbGBqZG///DwDuNR56'
         self.assertEqual(expected, result)
 
-    def test_service_education_app(self):
-        education_service = ServiceEducation()
-        education_service.add_privilege(
-            ServiceEducation.kPrivilegeApp, self.__expire)
-        self.__token.add_service(education_service)
+    def test_service_apaas_app(self):
+        apaas_service = ServiceApaas()
+        apaas_service.add_privilege(
+            ServiceApaas.kPrivilegeApp, self.__expire)
+        self.__token.add_service(apaas_service)
 
         result = self.__token.build()
 
@@ -143,14 +144,14 @@ class AccessToken2Test(unittest.TestCase):
         chat = ServiceChat(self.__uid_str)
         chat.add_privilege(ServiceChat.kPrivilegeUser, self.__expire)
 
-        education = ServiceEducation(user_uuid=self.__uid_str)
-        education.add_privilege(ServiceEducation.kPrivilegeUser, self.__expire)
+        apaas = ServiceApaas(user_uuid=self.__uid_str)
+        apaas.add_privilege(ServiceApaas.kPrivilegeUser, self.__expire)
 
         self.__token.add_service(rtc)
         self.__token.add_service(rtm)
         self.__token.add_service(fpa)
         self.__token.add_service(chat)
-        self.__token.add_service(education)
+        self.__token.add_service(apaas)
 
         result = self.__token.build()
 

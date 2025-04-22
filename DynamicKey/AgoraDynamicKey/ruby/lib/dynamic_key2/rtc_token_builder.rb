@@ -1,6 +1,15 @@
 module AgoraDynamicKey2
   class RtcTokenBuilder
+    # RECOMMENDED. Use this role for a voice/video call or a live broadcast, if
+    # your scenario does not require authentication for
+    # [Co-host](https://docs.agora.io/en/video-calling/get-started/authentication-workflow?#co-host-token-authentication).
     ROLE_PUBLISHER = 1
+
+    # Only use this role if your scenario require authentication for
+    # [Co-host](https://docs.agora.io/en/video-calling/get-started/authentication-workflow?#co-host-token-authentication).
+    # @note In order for this role to take effect, please contact our support team
+    # to enable authentication for Hosting-in for you. Otherwise, Role_Subscriber
+    # still has the same privileges as Role_Publisher.
     ROLE_SUBSCRIBER = 2
 
     # Build the RTC token with uid.
@@ -11,7 +20,7 @@ module AgoraDynamicKey2
     #     See Get an App Certificate.
     # channel_name: Unique channel name for the AgoraRTC session in the string format.
     # uid: User ID. A 32-bit unsigned integer with a value ranging from 1 to (2^32-1).
-    #     optionalUid must be unique.
+    #     uid must be unique.
     # role: ROLE_PUBLISHER: A broadcaster/host in a live-broadcast profile.
     #     ROLE_SUBSCRIBER: An audience(default) in a live-broadcast profile.
     # token_expire: represented by the number of seconds elapsed since now. If, for example,
@@ -24,7 +33,7 @@ module AgoraDynamicKey2
       build_token_with_user_account(app_id, app_certificate, channel_name, uid, role, token_expire, privilege_expire)
     end
 
-    # Build the RTC token with uid.
+    # Build the RTC token with account.
     #
     # app_id: The App ID issued to you by Agora. Apply for a new App ID from Agora Dashboard if it is missing
     #     from your kit. See Get an App ID.
@@ -32,7 +41,7 @@ module AgoraDynamicKey2
     #     See Get an App Certificate.
     # channel_name: Unique channel name for the AgoraRTC session in the string format.
     # uid: User ID. A 32-bit unsigned integer with a value ranging from 1 to (2^32-1).
-    #     optionalUid must be unique.
+    #     uid must be unique.
     # role: ROLE_PUBLISHER: A broadcaster/host in a live-broadcast profile.
     #     ROLE_SUBSCRIBER: An audience(default) in a live-broadcast profile.
     # token_expire: represented by the number of seconds elapsed since now. If, for example,
@@ -90,28 +99,22 @@ module AgoraDynamicKey2
     # @param uid The user ID. A 32-bit unsigned integer with a value range from 1 to (2^32 - 1). It must be unique. Set uid as 0, if you do not want to authenticate the user ID, that is, any uid from the app client can join the channel.
     # @param token_expire represented by the number of seconds elapsed since now. If, for example, you want to access the
     # Agora Service within 10 minutes after the token is generated, set token_expire as 600(seconds).
-    # @param join_channel_privilege_expire The Unix timestamp when the privilege for joining the channel expires, represented
-    # by the sum of the current timestamp plus the valid time period of the token. For example, if you set join_channel_privilege_expire as the
-    # current timestamp plus 600 seconds, the token expires in 10 minutes.
-    # @param pub_audio_privilege_expire The Unix timestamp when the privilege for publishing audio expires, represented
-    # by the sum of the current timestamp plus the valid time period of the token. For example, if you set pub_audio_privilege_expire as the
-    # current timestamp plus 600 seconds, the token expires in 10 minutes. If you do not want to enable this privilege,
-    # set pub_audio_privilege_expire as the current Unix timestamp.
-    # @param pub_video_privilege_expire The Unix timestamp when the privilege for publishing video expires, represented
-    # by the sum of the current timestamp plus the valid time period of the token. For example, if you set pub_video_privilege_expire as the
-    # current timestamp plus 600 seconds, the token expires in 10 minutes. If you do not want to enable this privilege,
-    # set pub_video_privilege_expire as the current Unix timestamp.
-    # @param pub_data_stream_privilege_expire The Unix timestamp when the privilege for publishing data streams expires, represented
-    # by the sum of the current timestamp plus the valid time period of the token. For example, if you set pub_data_stream_privilege_expire as the
-    # current timestamp plus 600 seconds, the token expires in 10 minutes. If you do not want to enable this privilege,
-    # set pub_data_stream_privilege_expire as the current Unix timestamp.
-    # @return The new Token
+    # @param join_channel_privilege_expire represented by the number of seconds elapsed since now.
+    # If, for example, you want to join channel and expect stay in the channel for 10 minutes, set join_channel_privilege_expire as 600(seconds).
+    # @param pub_audio_privilege_expire represented by the number of seconds elapsed since now.
+    # If, for example, you want to enable publish audio privilege for 10 minutes, set pub_audio_privilege_expire as 600(seconds).
+    # @param pub_video_privilege_expire represented by the number of seconds elapsed since now.
+    # If, for example, you want to enable publish video privilege for 10 minutes, set pub_video_privilege_expire as 600(seconds).
+    # @param pub_data_stream_privilege_expire represented by the number of seconds elapsed since now.
+    # If, for example, you want to enable publish data stream privilege for 10 minutes, set pub_data_stream_privilege_expire as 600(seconds).
+    # @return The RTC Token
     def self.build_token_with_uid_and_privilege(app_id, app_certificate, channel_name, uid, token_expire,
                                                 join_channel_privilege_expire, pub_audio_privilege_expire,
                                                 pub_video_privilege_expire, pub_data_stream_privilege_expire)
       build_token_with_user_account_and_privilege(
         app_id, app_certificate, channel_name, uid, token_expire, join_channel_privilege_expire,
-        pub_audio_privilege_expire, pub_video_privilege_expire, pub_data_stream_privilege_expire)
+        pub_audio_privilege_expire, pub_video_privilege_expire, pub_data_stream_privilege_expire
+      )
     end
 
     # Generates an RTC token with the specified privilege.
@@ -149,22 +152,15 @@ module AgoraDynamicKey2
     # @param account The user account.
     # @param token_expire represented by the number of seconds elapsed since now. If, for example, you want to access the
     # Agora Service within 10 minutes after the token is generated, set token_expire as 600(seconds).
-    # @param join_channel_privilege_expire The Unix timestamp when the privilege for joining the channel expires, represented
-    # by the sum of the current timestamp plus the valid time period of the token. For example, if you set join_channel_privilege_expire as the
-    # current timestamp plus 600 seconds, the token expires in 10 minutes.
-    # @param pub_audio_privilege_expire The Unix timestamp when the privilege for publishing audio expires, represented
-    # by the sum of the current timestamp plus the valid time period of the token. For example, if you set pub_audio_privilege_expire as the
-    # current timestamp plus 600 seconds, the token expires in 10 minutes. If you do not want to enable this privilege,
-    # set pub_audio_privilege_expire as the current Unix timestamp.
-    # @param pub_video_privilege_expire The Unix timestamp when the privilege for publishing video expires, represented
-    # by the sum of the current timestamp plus the valid time period of the token. For example, if you set pub_video_privilege_expire as the
-    # current timestamp plus 600 seconds, the token expires in 10 minutes. If you do not want to enable this privilege,
-    # set pub_video_privilege_expire as the current Unix timestamp.
-    # @param pub_data_stream_privilege_expire The Unix timestamp when the privilege for publishing data streams expires, represented
-    # by the sum of the current timestamp plus the valid time period of the token. For example, if you set pub_data_stream_privilege_expire as the
-    # current timestamp plus 600 seconds, the token expires in 10 minutes. If you do not want to enable this privilege,
-    # set pub_data_stream_privilege_expire as the current Unix timestamp.
-    # @return The new Token
+    # @param join_channel_privilege_expire represented by the number of seconds elapsed since now.
+    # If, for example, you want to join channel and expect stay in the channel for 10 minutes, set join_channel_privilege_expire as 600(seconds).
+    # @param pub_audio_privilege_expire represented by the number of seconds elapsed since now.
+    # If, for example, you want to enable publish audio privilege for 10 minutes, set pub_audio_privilege_expire as 600(seconds).
+    # @param pub_video_privilege_expire represented by the number of seconds elapsed since now.
+    # If, for example, you want to enable publish video privilege for 10 minutes, set pub_video_privilege_expire as 600(seconds).
+    # @param pub_data_stream_privilege_expire represented by the number of seconds elapsed since now.
+    # If, for example, you want to enable publish data stream privilege for 10 minutes, set pub_data_stream_privilege_expire as 600(seconds).
+    # @return The RTC Token
     def self.build_token_with_user_account_and_privilege(app_id, app_certificate, channel_name, account, token_expire,
                                                          join_channel_privilege_expire, pub_audio_privilege_expire,
                                                          pub_video_privilege_expire, pub_data_stream_privilege_expire)
@@ -176,6 +172,43 @@ module AgoraDynamicKey2
       service_rtc.add_privilege(AgoraDynamicKey2::ServiceRtc::PRIVILEGE_PUBLISH_VIDEO_STREAM, pub_video_privilege_expire)
       service_rtc.add_privilege(AgoraDynamicKey2::ServiceRtc::PRIVILEGE_PUBLISH_DATA_STREAM, pub_data_stream_privilege_expire)
       access_token.add_service(service_rtc)
+      access_token.build
+    end
+
+    # Build the RTC and RTM token with account.
+    #
+    # app_id: The App ID issued to you by Agora. Apply for a new App ID from Agora Dashboard if it is missing
+    #     from your kit. See Get an App ID.
+    # app_certificate: Certificate of the application that you registered in the Agora Dashboard.
+    #     See Get an App Certificate.
+    # channel_name: Unique channel name for the AgoraRTC session in the string format.
+    # uid: User ID. A 32-bit unsigned integer with a value ranging from 1 to (2^32-1).
+    #     uid must be unique.
+    # role: ROLE_PUBLISHER: A broadcaster/host in a live-broadcast profile.
+    #     ROLE_SUBSCRIBER: An audience(default) in a live-broadcast profile.
+    # token_expire: represented by the number of seconds elapsed since now. If, for example,
+    #    you want to access the Agora Service within 10 minutes after the token is generated,
+    #    set token_expire as 600(seconds).
+    # privilege_expire: represented by the number of seconds elapsed since now. If, for example,
+    #    you want to enable your privilege for 10 minutes, set privilege_expire as 600(seconds).
+    # return: The RTC and RTM token.
+    def self.build_token_with_rtm(app_id, app_certificate, channel_name, account, role, token_expire, privilege_expire = 0)
+      access_token = AgoraDynamicKey2::AccessToken.new(app_id, app_certificate, token_expire)
+      service_rtc = AgoraDynamicKey2::ServiceRtc.new(channel_name, account)
+
+      service_rtc.add_privilege(AgoraDynamicKey2::ServiceRtc::PRIVILEGE_JOIN_CHANNEL, privilege_expire)
+      if role == ROLE_PUBLISHER
+        service_rtc.add_privilege(AgoraDynamicKey2::ServiceRtc::PRIVILEGE_PUBLISH_AUDIO_STREAM, privilege_expire)
+        service_rtc.add_privilege(AgoraDynamicKey2::ServiceRtc::PRIVILEGE_PUBLISH_VIDEO_STREAM, privilege_expire)
+        service_rtc.add_privilege(AgoraDynamicKey2::ServiceRtc::PRIVILEGE_PUBLISH_DATA_STREAM, privilege_expire)
+      end
+      access_token.add_service(service_rtc)
+
+      service_rtm = AgoraDynamicKey2::ServiceRtm.new(account)
+
+      service_rtm.add_privilege(AgoraDynamicKey2::ServiceRtm::PRIVILEGE_JOIN_LOGIN, token_expire)
+      access_token.add_service(service_rtm)
+
       access_token.build
     end
   end

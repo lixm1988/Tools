@@ -1,17 +1,13 @@
 package io.agora.media;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 import java.util.Map;
 import java.util.TreeMap;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 public class AccessToken2 {
     public enum PrivilegeRtc {
-        PRIVILEGE_JOIN_CHANNEL(1),
-        PRIVILEGE_PUBLISH_AUDIO_STREAM(2),
-        PRIVILEGE_PUBLISH_VIDEO_STREAM(3),
-        PRIVILEGE_PUBLISH_DATA_STREAM(4),
-        ;
+        PRIVILEGE_JOIN_CHANNEL(1), PRIVILEGE_PUBLISH_AUDIO_STREAM(2), PRIVILEGE_PUBLISH_VIDEO_STREAM(3), PRIVILEGE_PUBLISH_DATA_STREAM(4),;
 
         public short intValue;
 
@@ -21,8 +17,7 @@ public class AccessToken2 {
     }
 
     public enum PrivilegeRtm {
-        PRIVILEGE_LOGIN(1),
-        ;
+        PRIVILEGE_LOGIN(1),;
 
         public short intValue;
 
@@ -32,8 +27,7 @@ public class AccessToken2 {
     }
 
     public enum PrivilegeFpa {
-        PRIVILEGE_LOGIN(1),
-        ;
+        PRIVILEGE_LOGIN(1),;
 
         public short intValue;
 
@@ -43,9 +37,7 @@ public class AccessToken2 {
     }
 
     public enum PrivilegeChat {
-        PRIVILEGE_CHAT_USER(1),
-        PRIVILEGE_CHAT_APP(2),
-        ;
+        PRIVILEGE_CHAT_USER(1), PRIVILEGE_CHAT_APP(2),;
 
         public short intValue;
 
@@ -54,15 +46,12 @@ public class AccessToken2 {
         }
     }
 
-    public enum PrivilegeEducation {
-        PRIVILEGE_ROOM_USER(1),
-        PRIVILEGE_USER(2),
-        PRIVILEGE_APP(3),
-        ;
+    public enum PrivilegeApaas {
+        PRIVILEGE_ROOM_USER(1), PRIVILEGE_USER(2), PRIVILEGE_APP(3),;
 
         public short intValue;
 
-        PrivilegeEducation(int value) {
+        PrivilegeApaas(int value) {
             intValue = (short) value;
         }
     }
@@ -72,7 +61,7 @@ public class AccessToken2 {
     public static final short SERVICE_TYPE_RTM = 2;
     public static final short SERVICE_TYPE_FPA = 4;
     public static final short SERVICE_TYPE_CHAT = 5;
-    public static final short SERVICE_TYPE_EDUCATION = 7;
+    public static final short SERVICE_TYPE_APAAS = 7;
 
     public String appCert = "";
     public String appId = "";
@@ -81,8 +70,7 @@ public class AccessToken2 {
     public int salt;
     public Map<Short, Service> services = new TreeMap<>();
 
-    public AccessToken2() {
-    }
+    public AccessToken2() {}
 
     public AccessToken2(String appId, String appCert, int expire) {
         this.appCert = appCert;
@@ -132,8 +120,8 @@ public class AccessToken2 {
         if (serviceType == SERVICE_TYPE_CHAT) {
             return new ServiceChat();
         }
-        if (serviceType == SERVICE_TYPE_EDUCATION) {
-            return new ServiceEducation();
+        if (serviceType == SERVICE_TYPE_APAAS) {
+            return new ServiceApaas();
         }
         throw new IllegalArgumentException(String.format("unknown service type: `%d`", serviceType));
     }
@@ -161,31 +149,36 @@ public class AccessToken2 {
         if (!getVersion().equals(token.substring(0, Utils.VERSION_LENGTH))) {
             return false;
         }
-        byte[] data = Utils.decompress(Utils.base64Decode(token.substring(Utils.VERSION_LENGTH)));
-        ByteBuf buff = new ByteBuf(data);
-        String signature = buff.readString();
-        this.appId = buff.readString();
-        this.issueTs = buff.readInt();
-        this.expire = buff.readInt();
-        this.salt = buff.readInt();
-        short servicesNum = buff.readShort();
 
-        for (int i = 0; i < servicesNum; i++) {
-            short serviceType = buff.readShort();
-            Service service = getService(serviceType);
-            service.unpack(buff);
-            this.services.put(serviceType, service);
+        try {
+            byte[] data = Utils.decompress(Utils.base64Decode(token.substring(Utils.VERSION_LENGTH)));
+            ByteBuf buff = new ByteBuf(data);
+            String signature = buff.readString();
+            this.appId = buff.readString();
+            this.issueTs = buff.readInt();
+            this.expire = buff.readInt();
+            this.salt = buff.readInt();
+            short servicesNum = buff.readShort();
+
+            for (int i = 0; i < servicesNum; i++) {
+                short serviceType = buff.readShort();
+                Service service = getService(serviceType);
+                service.unpack(buff);
+                this.services.put(serviceType, service);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
+
         return true;
     }
 
     public static class Service {
         public short type;
-        public TreeMap<Short, Integer> privileges = new TreeMap<Short, Integer>() {
-        };
+        public TreeMap<Short, Integer> privileges = new TreeMap<Short, Integer>() {};
 
-        public Service() {
-        }
+        public Service() {}
 
         public Service(short serviceType) {
             this.type = serviceType;
@@ -207,7 +200,7 @@ public class AccessToken2 {
             this.privileges.put(privilege.intValue, expire);
         }
 
-        public void addPrivilegeEducation(PrivilegeEducation privilege, int expire) {
+        public void addPrivilegeApaas(PrivilegeApaas privilege, int expire) {
             this.privileges.put(privilege.intValue, expire);
         }
 
@@ -328,27 +321,27 @@ public class AccessToken2 {
         }
     }
 
-    public static class ServiceEducation extends Service {
+    public static class ServiceApaas extends Service {
         public String roomUuid;
         public String userUuid;
         public Short role;
 
-        public ServiceEducation() {
-            this.type = SERVICE_TYPE_EDUCATION;
+        public ServiceApaas() {
+            this.type = SERVICE_TYPE_APAAS;
             this.roomUuid = "";
             this.userUuid = "";
             this.role = -1;
         }
 
-        public ServiceEducation(String roomUuid, String userUuid, Short role) {
-            this.type = SERVICE_TYPE_EDUCATION;
+        public ServiceApaas(String roomUuid, String userUuid, Short role) {
+            this.type = SERVICE_TYPE_APAAS;
             this.roomUuid = roomUuid;
             this.userUuid = userUuid;
             this.role = role;
         }
 
-        public ServiceEducation(String userUuid) {
-            this.type = SERVICE_TYPE_EDUCATION;
+        public ServiceApaas(String userUuid) {
+            this.type = SERVICE_TYPE_APAAS;
             this.roomUuid = "";
             this.userUuid = userUuid;
             this.role = -1;
